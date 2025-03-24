@@ -11,7 +11,7 @@
 **Documind** 一个支持实时聊天和接入deepseek-r1模型AI助手的协同文档编辑项目
 
 - **前端**：NextJS + React + TailwindCSS + ShadcnUl + Tiptap + Zustand
-- **后端**：NextJS + Convex + Liveblocks
+- **后端**：NextJS + Convex + Liveblocks + Clerk
 - **项目预览**：[Documind 预览地址](https://doc.mebius.fun/) （部署于 Vercel）
 
 如果使用有异常请挂梯子使用
