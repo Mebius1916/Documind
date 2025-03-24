@@ -1,22 +1,34 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
 
-export function useDebounce<
-  T extends (...args: Parameters<T>) => ReturnType<T>,
->(callback: T, delay: number = 500) {
+export function useDebounce<T extends (...args: any[]) => any>(
+  callback: T,
+  delay: number = 500
+) {
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const mountedRef = useRef(true);
 
-  return useCallback(
-    (...args: Parameters<T>) => {
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      //存储的setTimeout 返回的定时器ID
-      timeoutRef.current = setTimeout(() => {
+    };
+  }, []);
+
+  return useCallback((...args: Parameters<T>) => {
+    if (!mountedRef.current) return;
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      if (mountedRef.current && document.visibilityState === 'visible') {
         callback(...args);
-      }, delay);
-    },
-    [callback, delay]
-  );
+      }
+    }, delay);
+  }, [callback, delay]);
 }
 
 //js版本：

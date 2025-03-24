@@ -10,10 +10,18 @@ import { api } from "../../../convex/_generated/api";
 import dynamic from "next/dynamic";
 import { FullscreenLoader } from "@/components/fullscreen-loader";
 import Image from "next/image";
+import { useHydration } from "@/hooks/useHydration";
+
 const AiChat = dynamic(() => import("./components/aiChat"), {
-  loading: () => <FullscreenLoader label="AI Assistant Loading..."/>, // 加载时显示的内容
-  ssr: false, // 关闭服务器端渲染
+  loading: () => {
+    const { fallbackValue } = useHydration({ 
+      fallback: <FullscreenLoader label="AI Assistant Loading..."/> 
+    });
+    return fallbackValue as React.ReactElement;
+  },
+  ssr: false
 });
+
 const Page = () => {
   const [dialog, setDialog] = useState(false);
   const [search] = useSearchParams("search");

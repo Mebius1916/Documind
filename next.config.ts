@@ -30,7 +30,6 @@ const nextConfig: NextConfig = {
 
   webpack: (config) => { // 自定义 Webpack 配置
     config.plugins.push(new MeasureBuildTimePlugin()); // 添加自定义构建时间测量插件
-
     // 配置代码分割策略
     config.optimization.splitChunks = {
       chunks: "all", // 对所有类型的代码进行分割
@@ -78,6 +77,12 @@ const nextConfig: NextConfig = {
           priority: -20, // 优先级最低
           reuseExistingChunk: true, // 允许重用已存在的块
         },
+        hydration: {
+          test: /[\\/]src[\\/]hooks[\\/]use-hydration/,
+          name: 'hydration',
+          priority: 30,
+          reuseExistingChunk: true
+        }
       },
     };
 
@@ -119,7 +124,6 @@ const nextConfig: NextConfig = {
         config: [__filename], // 依赖于当前配置文件
       },
     };
-
     return config; // 返回修改后的 Webpack 配置
   },
 };

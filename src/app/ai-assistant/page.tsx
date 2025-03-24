@@ -5,6 +5,7 @@ import { ChatInput } from "./components/chatInput";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
 import ChatMessages from "./components/chatMessage";
 import { useSearchParams } from "@/hooks/use-search-params";
+import { useHydration } from "@/hooks/useHydration";
 // AI聊天对话框组件
 // initialQuery - 初始查询语句，组件加载时会自动发送
 // initialContent - 初始化内容类型，用于控制界面元素显示
@@ -56,18 +57,20 @@ def quick_sort(arr):
   // 初始请求处理标识（防止重复处理）
   const initialProcessRef = useRef(false);
 
+  const { isHydrated } = useHydration();
+
   // 消息变化时自动滚动处理
   useEffect(() => {
-    const currentTimeoutRef = timeoutRef.current; // 复制值到变量
+    if (!isHydrated) return;
+    
+    const currentTimeoutRef = timeoutRef.current;
     if (messages.length > 1) {
       scrollToBottom();
     }
     return () => {
-      if (currentTimeoutRef) {
-        clearTimeout(currentTimeoutRef);
-      }
+      currentTimeoutRef && clearTimeout(currentTimeoutRef);
     };
-  }, [messages, scrollToBottom]); // 添加 scrollToBottom 作为依赖
+  }, [messages, scrollToBottom, isHydrated]);
 
   // 发送消息处理函数
   const handleSend = useCallback(async (message?: { role: string; content: string }) => {
