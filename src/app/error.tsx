@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { AlertTriangleIcon } from "lucide-react";
-import Link from "next/link";
+import { navigate } from "@/lib/events";
 
 const ErrorPage = ({
   error,
@@ -30,8 +30,12 @@ const ErrorPage = ({
         <Button onClick={reset} className="font-medium px-6">
           Try again
         </Button>
-        <Button asChild variant="ghost" className="font-medium px-6">
-          <Link href="/">Go back</Link>
+        <Button 
+          onClick={() => navigate("/")}
+          variant="ghost" 
+          className="font-medium px-6"
+        >
+          Go back
         </Button>
       </div>
     </div>

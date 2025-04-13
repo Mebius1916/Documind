@@ -15,9 +15,7 @@ import { Id } from "../../convex/_generated/dataModel";
 import React, { useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { useMutation } from "convex/react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-
+import { reportError, sendNotification, navigate } from "@/lib/events";
 
 interface RemoveDialogProps {
   documentId: Id<"documents">;
@@ -26,8 +24,8 @@ interface RemoveDialogProps {
 
 export const RemoveDialog = ({ documentId, children }: RemoveDialogProps) => {
   const remove = useMutation(api.documents.removeById);
-  const [isRemoving,setIsRemoving] = useState(false);
-  const router = useRouter();
+  const [isRemoving, setIsRemoving] = useState(false);
+  
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
@@ -45,20 +43,22 @@ export const RemoveDialog = ({ documentId, children }: RemoveDialogProps) => {
           </AlertDialogCancel>
           <AlertDialogAction
             disabled={isRemoving}
-            onClick={(e)=>{
+            onClick={(e) => {
               e.stopPropagation();
               setIsRemoving(true);
-              remove({id:documentId})
-                .catch(() => toast.error("Failed to delete document"))
-                .then(() => {
-                  toast.success("Document deleted");
-                  router.push("/");
+              remove({id: documentId})
+                .catch((error) => {
+                  reportError("删除文档失败", error as Error);
                 })
-                .finally(()=>{setIsRemoving(false)});
-
+                .then(() => {
+                  sendNotification("文档已删除", "success");
+                  navigate("/", { replace: true });
+                })
+                .finally(() => {
+                  setIsRemoving(false);
+                });
             }}
           >
-
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

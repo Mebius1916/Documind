@@ -15,17 +15,16 @@ import {
 import { RemoveDialog } from "@/components/remove-dialog";
 import { RenameDialog } from "@/components/rename-dialog";
 import { Id } from "../../../../convex/_generated/dataModel";
+import { navigate } from "@/lib/events";
 
 interface DocumentMenuProps {
   documentId: Id<"documents">;
   title: string;
-  onNewTab: (e: React.MouseEvent, id: string) => void;
 }
 
 export const DocumentMenu = ({
   documentId,
   title,
-  onNewTab,
 }: DocumentMenuProps) => {
   return (
     <DropdownMenu>
@@ -53,7 +52,12 @@ export const DocumentMenu = ({
             Remove
           </DropdownMenuItem>
         </RemoveDialog>
-        <DropdownMenuItem onClick={(e) => onNewTab(e, documentId)}>
+        <DropdownMenuItem 
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/documents/${documentId}`, { newTab: true });
+          }}
+        >
           <ExternalLinkIcon className="size-4 mr-2" />
           Open in a new tab
         </DropdownMenuItem>

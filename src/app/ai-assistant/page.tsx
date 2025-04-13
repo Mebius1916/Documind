@@ -10,7 +10,7 @@ import { useHydration } from "@/hooks/useHydration";
 // initialQuery - 初始查询语句，组件加载时会自动发送
 // initialContent - 初始化内容类型，用于控制界面元素显示
 const ChatDialog = ({ initialContent }: any) => {
-  const [initialQuery,setInitialQuery] = useSearchParams("search");
+  const [initialQuery, setInitialQuery] = useSearchParams("search");
   // 消息列表状态，包含初始欢迎信息
   const [messages, setMessages] = useState([
     {
@@ -68,9 +68,11 @@ def quick_sort(arr):
       scrollToBottom();
     }
     return () => {
-      currentTimeoutRef && clearTimeout(currentTimeoutRef);
+      if (currentTimeoutRef) {
+        clearTimeout(currentTimeoutRef);
+      }
     };
-  }, [messages, scrollToBottom, isHydrated]);
+  }, [messages, scrollToBottom, isHydrated, timeoutRef]);
 
   // 发送消息处理函数
   const handleSend = useCallback(async (message?: { role: string; content: string }) => {
@@ -164,22 +166,22 @@ def quick_sort(arr):
       };
       autoAsk();
     }
-  }, [initialQuery, handleSend]); // 添加 handleSend 作为依赖
+  }, [initialQuery, handleSend, setInitialQuery]);
 
   return (
     <div className="flex-1 flex flex-col h-full p-0">
-      {initialContent!=="Lassistant"&&(
+      {initialContent !== "Lassistant" && (
         <div className="flex mx-auto mt-10">
           <Image src="/logo2.png" alt="Logo" width={100} height={100} />
         </div>
       )}
-      <ChatMessages messages={messages} messagesEndRef={messagesEndRef} initialContent={initialContent||""} />
+      <ChatMessages messages={messages} messagesEndRef={messagesEndRef} initialContent={initialContent || ""} />
       <ChatInput
         input={input}
         setInput={setInput}
         handleSend={handleSend}
         isFetching={isFetching}
-        initialContent={initialContent||""}
+        initialContent={initialContent || ""}
       />
     </div>
   );

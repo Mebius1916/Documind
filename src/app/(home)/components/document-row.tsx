@@ -1,10 +1,12 @@
 "use client";
 // 导入必要的组件和类型
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Building2Icon, CircleUserIcon,FileText } from "lucide-react";
+import { Building2Icon, CircleUserIcon, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { DocumentMenu } from "./document-menu";
 import { Doc } from "../../../../convex/_generated/dataModel";
+import { navigate } from "@/lib/events";
+
 // 定义组件的 Props 接口
 interface DocumentRowProps {
   document: Doc<"documents">;
@@ -12,13 +14,10 @@ interface DocumentRowProps {
 
 // 定义 DocumentRow 组件
 export const DocumentRow = ({ document }: DocumentRowProps) => {
-  const onNewTabClick = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // 阻止事件冒泡
-    window.open(`/documents/${id}`, "_blank"); //在新标签页中打开标签
-  };
   const onRowClick = (id: string) => {
-    window.open(`/documents/${id}`, "_blank");
+    navigate(`/documents/${id}`, { newTab: true }); // 使用事件总线导航
   };
+  
   return (
     <TableRow
       className="cursor-pointer"
@@ -43,7 +42,6 @@ export const DocumentRow = ({ document }: DocumentRowProps) => {
         <DocumentMenu
           documentId={document._id}
           title={document.title}
-          onNewTab={(e) => onNewTabClick(document._id, e)}
         />
       </TableCell>
     </TableRow>

@@ -4,6 +4,7 @@ import {NuqsAdapter} from "nuqs/adapters/next/app";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { Toaster } from "sonner";
+import { EventProvider } from "@/components/event-listener";
 
 import "@liveblocks/react-tiptap/styles.css";
 import "@liveblocks/react-ui/styles.css";
@@ -29,8 +30,10 @@ export default function RootLayout({
       >
         <NuqsAdapter>
           <ConvexClientProvider>
-            <Toaster />
-            {children}
+            <EventProvider>
+              <Toaster />
+              {children}
+            </EventProvider>
           </ConvexClientProvider>
         </NuqsAdapter>
       </body>

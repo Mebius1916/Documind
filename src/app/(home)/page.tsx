@@ -1,5 +1,5 @@
 "use client";
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import Navbar from "./components/narbar";
 import SearchInput from "./components/search-input";
 import { TemplateGallery } from "./components/templates-gallery";
@@ -10,15 +10,14 @@ import { api } from "../../../convex/_generated/api";
 import dynamic from "next/dynamic";
 import { FullscreenLoader } from "@/components/fullscreen-loader";
 import Image from "next/image";
-import { useHydration } from "@/hooks/useHydration";
+
+// 提前准备加载状态组件
+const LoadingFallback = () => (
+  <FullscreenLoader label="AI Assistant Loading..." />
+);
 
 const AiChat = dynamic(() => import("./components/aiChat"), {
-  loading: () => {
-    const { fallbackValue } = useHydration({ 
-      fallback: <FullscreenLoader label="AI Assistant Loading..."/> 
-    });
-    return fallbackValue as React.ReactElement;
-  },
+  loading: () => <LoadingFallback />,
   ssr: false
 });
 

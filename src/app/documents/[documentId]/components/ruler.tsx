@@ -4,14 +4,9 @@ import { useRef, useState } from "react";
 import { Marker } from "./maker";
 import { useMutation, useStorage } from "@liveblocks/react";
 import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "@/lib/margin";
-import { useHydration } from "@/hooks/useHydration";
+
 const markers = Array.from({ length: 83 }, (_, index) => index); //83个刻度
 export const Ruler = () => {
-  const { isHydrated, fallbackValue } = useHydration({
-    fallback: <div className="h-8 bg-gray-100 animate-pulse" />,
-    delay: 50 // 极短延迟保证水合后立即显示
-  });
-
   const leftMargin =
     useStorage((root: any) => {
       return root.leftMargin;
@@ -108,68 +103,64 @@ export const Ruler = () => {
 
   return (
     <div className="ruler-container">
-      {!isHydrated ? fallbackValue : (
-        <>
-          <div
-            ref={rulerRef}
-            onMouseMove={handleMouseMove} // 鼠标移动事件（拖拽）
-            onMouseUp={handleMouseUp} // 鼠标松开事件（停止拖拽）
-            onMouseLeave={handleMouseUp} // 鼠标离开事件（停止拖拽）
-            className="w-[816px] mx-auto h-6 border-b border-gray-300 flex items-end relative select-none print:hidden mb-1"
-          >
-            <div id="ruler-container" className="w-full h-full mx-auto relative">
-              <Marker
-                position={leftMargin}
-                isLeft={true}
-                isDragging={isDraggingLeft}
-                onMouseDown={handleMouseDownLeft}
-                onDoubleClick={handleLeftDoubleClick}
-              />
-              <Marker
-                position={rightMargin}
-                isLeft={false}
-                isDragging={isDraggingRight}
-                onMouseDown={handleMouseDownRight}
-                onDoubleClick={handleRightDoubleClick}
-              />
-              <div className="absolute inset-x-0 bottom-0 h-full">
-                <div className="relative h-full w-[816px]">
-                  {markers.map((marker) => {
-                    const position = (marker * 816) / 82;
-                    return (
-                      <div
-                        key={marker}
-                        className="absolute bottom-0"
-                        style={{ left: `${position}px` }}
-                      >
-                        {/* 主刻度（每1cm）：显示最高刻度线和数字 */}
-                        {marker % 10 === 0 && (
-                          <>
-                            <div className="absolute bottom-0 w-[1px] h-2 bg-neutral-500" />
-                            <span className="absolute bottom-2 text-[8px] text-neutral-500 transform -translate-x-1/2">
-                              {marker / 10 + 1}
-                            </span>
-                          </>
-                        )}
-                        
-                        {/* 中等刻度（每0.5cm）：显示中等高度刻度线 */}
-                        {marker % 5 === 0 && marker % 10 !== 0 && (
-                          <div className="absolute bottom-0 w-[1px] h-1.5 bg-neutral-500" />
-                        )}
-                        
-                        {/* 小刻度（每0.1cm）：显示最矮刻度线 */}
-                        {marker % 5 !== 0 && (
-                          <div className="absolute bottom-0 w-[1px] h-1 bg-neutral-500" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+      <div
+        ref={rulerRef}
+        onMouseMove={handleMouseMove} // 鼠标移动事件（拖拽）
+        onMouseUp={handleMouseUp} // 鼠标松开事件（停止拖拽）
+        onMouseLeave={handleMouseUp} // 鼠标离开事件（停止拖拽）
+        className="w-[816px] mx-auto h-6 border-b border-gray-300 flex items-end relative select-none print:hidden mb-1"
+      >
+        <div id="ruler-container" className="w-full h-full mx-auto relative">
+          <Marker
+            position={leftMargin}
+            isLeft={true}
+            isDragging={isDraggingLeft}
+            onMouseDown={handleMouseDownLeft}
+            onDoubleClick={handleLeftDoubleClick}
+          />
+          <Marker
+            position={rightMargin}
+            isLeft={false}
+            isDragging={isDraggingRight}
+            onMouseDown={handleMouseDownRight}
+            onDoubleClick={handleRightDoubleClick}
+          />
+          <div className="absolute inset-x-0 bottom-0 h-full">
+            <div className="relative h-full w-[816px]">
+              {markers.map((marker) => {
+                const position = (marker * 816) / 82;
+                return (
+                  <div
+                    key={marker}
+                    className="absolute bottom-0"
+                    style={{ left: `${position}px` }}
+                  >
+                    {/* 主刻度（每1cm）：显示最高刻度线和数字 */}
+                    {marker % 10 === 0 && (
+                      <>
+                        <div className="absolute bottom-0 w-[1px] h-2 bg-neutral-500" />
+                        <span className="absolute bottom-2 text-[8px] text-neutral-500 transform -translate-x-1/2">
+                          {marker / 10 + 1}
+                        </span>
+                      </>
+                    )}
+                    
+                    {/* 中等刻度（每0.5cm）：显示中等高度刻度线 */}
+                    {marker % 5 === 0 && marker % 10 !== 0 && (
+                      <div className="absolute bottom-0 w-[1px] h-1.5 bg-neutral-500" />
+                    )}
+                    
+                    {/* 小刻度（每0.1cm）：显示最矮刻度线 */}
+                    {marker % 5 !== 0 && (
+                      <div className="absolute bottom-0 w-[1px] h-1 bg-neutral-500" />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 };

@@ -3,7 +3,6 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import Image from "next/image";
 import React from "react";
-import { useHydration } from "@/hooks/useHydration";
 
 export const AssistantMessage = React.memo(({
   content,
@@ -129,18 +128,3 @@ export const UserMessage = React.memo(({ content }: { content: string }) => (
 
 // 添加显示名称
 UserMessage.displayName = 'UserMessage';
-
-const CodeBlock = ({ code }: { code: string }) => {
-  const { isHydrated, fallbackValue } = useHydration({
-    fallback: <pre className="bg-gray-800 p-4 rounded">{code}</pre>,
-    delay: 50
-  });
-
-  return isHydrated ? (
-    <SyntaxHighlighter language="javascript" style={materialDark}>
-      {code}
-    </SyntaxHighlighter>
-  ) : (
-    fallbackValue
-  );
-}

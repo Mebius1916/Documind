@@ -18,6 +18,7 @@ import Link from "next/link";
 import React from "react";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+
 const Editor = dynamic(() => import("./editor").then((mod) => mod.Editor), {
   ssr: false,
   loading: () => <Skeleton className="w-[816px] min-h-[1054px] mx-auto" />
