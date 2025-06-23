@@ -10,10 +10,18 @@ import { ReactNode } from "react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ClerkProvider, useAuth, SignIn } from "@clerk/clerk-react";
 import { FullscreenLoader } from "./fullscreen-loader";
+import { useHydration } from "@/hooks/use-hydration";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
+  const { isHydrated } = useHydration();
+
+  // 在水合完成前显示加载状态
+  if (!isHydrated) {
+    return <FullscreenLoader label="正在初始化应用..." />;
+  }
+
   return (
     <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}>
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>

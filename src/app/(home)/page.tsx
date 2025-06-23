@@ -10,10 +10,13 @@ import { api } from "../../../convex/_generated/api";
 import dynamic from "next/dynamic";
 import { FullscreenLoader } from "@/components/fullscreen-loader";
 import Image from "next/image";
+import { ClientOnly } from "@/components/client-only";
+
 const AiChat = dynamic(() => import("./components/aiChat"), {
   loading: () => <FullscreenLoader label="AI Assistant Loading..."/>, // 加载时显示的内容
   ssr: false, // 关闭服务器端渲染
 });
+
 const Page = () => {
   const [dialog, setDialog] = useState(false);
   const [search] = useSearchParams("search");
@@ -22,6 +25,7 @@ const Page = () => {
     { search },
     { initialNumItems: 5 }
   );
+  
   const closeDialog = () => {
     setDialog(false);
   };
@@ -46,7 +50,12 @@ const Page = () => {
       <div className="fixed top-0 left-0 right-0 z-10 h-16">
         <Navbar />
       </div>
-      {dialog && <AiChat closeDialog={closeDialog} />}
+      
+      {/* 使用 ClientOnly 包装 AI 聊天对话框 */}
+      <ClientOnly>
+        {dialog && <AiChat closeDialog={closeDialog} />}
+      </ClientOnly>
+      
       <div className="mt-10">
         <SearchInput dialog={aiDialog} />
         <TemplateGallery />

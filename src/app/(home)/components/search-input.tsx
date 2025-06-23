@@ -4,13 +4,18 @@ import { Input } from "@/components/ui/input";
 import { SearchIcon, XIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { useSearchParams } from "@/hooks/use-search-params";
+import { useHydration } from "@/hooks/use-hydration";
+
 interface Props {
   dialog: () => void;
 }
+
 export const SearchInput = ({ dialog }: Props) => {
+  const { isHydrated } = useHydration();
   const [search, setSearch] = useSearchParams("search");
   const [value, setValue] = useState(search || "");
   const inputRef = useRef<HTMLInputElement>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };
@@ -30,6 +35,17 @@ export const SearchInput = ({ dialog }: Props) => {
     setSearch(value);
     dialog();
   };
+
+  // 在水合完成前显示简化版本
+  if (!isHydrated) {
+    return (
+      <div className="flex-1 flex items-center justify-center mt-6">
+        <div className="relative max-w-[720px] w-[75%]">
+          <div className="md:text-base px-6 w-full border-none bg-[#F0F4F8] h-[48px] rounded-md animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
