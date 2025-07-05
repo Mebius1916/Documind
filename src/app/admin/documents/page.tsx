@@ -14,9 +14,7 @@ import {
   Edit3,
   Eye,
   Download,
-  PieChart,
   BarChart3,
-  Calendar,
   MessageSquare
 } from 'lucide-react';
 import {

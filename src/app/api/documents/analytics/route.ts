@@ -58,24 +58,6 @@ export async function GET(request: NextRequest) {
  */
 async function getDocumentStats(since: number) {
   try {
-    // 文档操作统计
-    const documentActions = await TrackingEventModel.aggregate([
-      {
-        $match: {
-          eventType: 'document_action',
-          timestamp: { $gte: since }
-        }
-      },
-      {
-        $group: {
-          _id: '$eventName',
-          count: { $sum: 1 },
-          uniqueDocuments: { $addToSet: '$document.id' },
-          uniqueUsers: { $addToSet: '$userId' }
-        }
-      }
-    ]);
-
     // 文档查看统计
     const documentViews = await TrackingEventModel.aggregate([
       {

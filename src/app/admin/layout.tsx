@@ -4,18 +4,15 @@ import React from 'react';
 import { useUser } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { 
   BarChart3, 
-  Users, 
   FileText, 
-  Settings, 
-  Home,
   Activity,
-  Shield,
-  Database
+  Home,
+  Shield
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -91,10 +88,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         {/* 用户信息 */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-3">
-            <img
-              src={user?.imageUrl}
+            <Image
+              src={user?.imageUrl || '/logo.png'}
               alt={user?.fullName || ''}
-              className="w-10 h-10 rounded-full"
+              width={40}
+              height={40}
+              className="rounded-full"
             />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">

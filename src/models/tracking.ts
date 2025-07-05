@@ -240,7 +240,7 @@ export class TrackingDB {
         sessionUpdates.get(event.sessionId).events.push(event);
       }
 
-      for (const [sessionId, sessionData] of sessionUpdates) {
+      for (const sessionData of sessionUpdates.values()) {
         await this.updateUserSession(sessionData);
       }
     } catch (error) {

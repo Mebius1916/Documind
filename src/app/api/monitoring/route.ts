@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import { TrackingEventModel } from '@/models/tracking';
 
@@ -6,13 +6,11 @@ import { TrackingEventModel } from '@/models/tracking';
  * 获取系统监控数据
  * GET /api/monitoring
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     await connectDB();
     
-    const now = Date.now();
-    const lastHour = now - (60 * 60 * 1000);
-    const last24Hours = now - (24 * 60 * 60 * 1000);
+    const last24Hours = Date.now() - (24 * 60 * 60 * 1000);
 
     // 获取系统状态
     const systemStatus = await getSystemStatus();
@@ -87,7 +85,7 @@ async function checkDatabaseStatus() {
     // 尝试执行一个简单的查询
     await TrackingEventModel.countDocuments().limit(1);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -101,7 +99,7 @@ async function checkApiStatus() {
     // 我们检查数据库连接是否正常作为API健康状况的指标
     await TrackingEventModel.countDocuments().limit(1);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -116,7 +114,7 @@ async function checkTrackingStatus() {
       timestamp: { $gte: last5Minutes }
     });
     return recentEvents >= 0; // 即使没有事件也表示系统正常
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -285,7 +283,6 @@ async function getPerformanceTrend(since: number) {
     ]);
 
     // 合并数据
-    const mergedData = [];
     const timeMap = new Map();
 
     performanceData.forEach(item => {

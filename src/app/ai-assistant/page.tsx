@@ -67,7 +67,7 @@ def quick_sort(arr):
         clearTimeout(currentTimeoutRef);
       }
     };
-  }, [messages, scrollToBottom]); // 添加 scrollToBottom 作为依赖
+  }, [messages, scrollToBottom, timeoutRef]); // 添加所有依赖
 
   // 发送消息处理函数
   const handleSend = useCallback(async (message?: { role: string; content: string }) => {
@@ -161,7 +161,7 @@ def quick_sort(arr):
       };
       autoAsk();
     }
-  }, [initialQuery, handleSend]); // 添加 handleSend 作为依赖
+  }, [initialQuery, handleSend, setInitialQuery]); // 添加所有依赖
 
   return (
     <div className="flex-1 flex flex-col h-full p-0">

@@ -63,6 +63,9 @@ class AnalyticsStorage implements TrackingStorage {
         //   headers: { 'Content-Type': 'application/json' },
         //   body: JSON.stringify(event),
         // });
+        
+        // 记录事件用于调试
+        console.debug('📊 [分析平台]', event.eventName, event.eventType);
       }
       
       console.log('📈 [发送到分析平台]', events.length, '条数据');

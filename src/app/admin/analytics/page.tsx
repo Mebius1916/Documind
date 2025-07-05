@@ -199,13 +199,6 @@ const AnalyticsPage: React.FC = () => {
     return num.toString();
   };
 
-  // 格式化持续时间
-  const formatDuration = (ms: number) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   if (error) {
     return (
       <div className="p-6">
