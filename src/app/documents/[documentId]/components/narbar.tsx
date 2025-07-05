@@ -15,6 +15,8 @@ import { Avatars } from "./avatars";
 import { useCallback } from "react";
 import dynamic from 'next/dynamic';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { BarChart3 } from "lucide-react";
 import React from "react";
 
 interface NavbarProps {
@@ -67,6 +69,12 @@ export const Navbar = React.memo(({ data }: NavbarProps) => {
         </div>
         <div className="ml-auto flex items-center gap-3 mr-4">
          <Avatars />
+          <Link href="/admin">
+            <Button variant="ghost" size="sm" className="text-xs flex items-center gap-1">
+              <BarChart3 className="h-3 w-3" />
+              分析
+            </Button>
+          </Link>
           <Inbox />
           <OrganizationSwitcher
             afterCreateOrganizationUrl="/"
