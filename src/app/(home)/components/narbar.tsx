@@ -1,8 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
-import { BarChart3 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export const Navbar = () => {
   return (

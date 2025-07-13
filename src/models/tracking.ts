@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 // 基础埋点事件模型
 const TrackingEventSchema = new Schema({

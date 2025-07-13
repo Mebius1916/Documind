@@ -9,6 +9,7 @@ interface ChatInputProps {
   handleSend: () => void;
   isFetching: boolean;
   initialContent?: string;
+  isPending?: boolean;
 }
 
 export const ChatInput = ({

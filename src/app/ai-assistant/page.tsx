@@ -49,7 +49,7 @@ def quick_sort(arr):
   
   // 🔥 核心优化：useTransition 用于管理流式更新优先级
   // 确保用户输入不被频繁的消息更新阻塞
-  const [isPending, startTransition] = useTransition();
+  const [startTransition] = useTransition();
   
   // 自动滚动相关配置
   const {
