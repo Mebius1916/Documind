@@ -199,6 +199,20 @@ const AnalyticsPage: React.FC = () => {
     return num.toString();
   };
 
+  // 格式化变化文本
+  const formatChangeText = (changeValue: string, timeRange: string) => {
+    if (!changeValue || changeValue === '无数据') return '无数据';
+    
+    const timeRangeText = {
+      '1': '比昨天',
+      '7': '比上周',
+      '30': '比上月',
+      '90': '比上季度'
+    }[timeRange] || '比前期';
+    
+    return `${changeValue} ${timeRangeText}`;
+  };
+
   if (error) {
     return (
       <div className="p-6">
@@ -278,32 +292,32 @@ const AnalyticsPage: React.FC = () => {
             <MetricCard
               title="总事件数"
               value={formatNumber(data.overview?.basicStats?.totalEvents || 0)}
-              change="+12.5% 比昨天"
-              changeType="positive"
+              change={formatChangeText(data.overview?.basicStats?.changes?.totalEvents?.value || '无数据', timeRange)}
+              changeType={data.overview?.basicStats?.changes?.totalEvents?.type || 'neutral'}
               icon={<Activity />}
               description="用户行为事件总数"
             />
             <MetricCard
               title="活跃用户"
               value={formatNumber(data.overview?.basicStats?.uniqueUsers || 0)}
-              change="+8.2% 比昨天"
-              changeType="positive"
+              change={formatChangeText(data.overview?.basicStats?.changes?.uniqueUsers?.value || '无数据', timeRange)}
+              changeType={data.overview?.basicStats?.changes?.uniqueUsers?.type || 'neutral'}
               icon={<Users />}
               description="独立用户访问数"
             />
             <MetricCard
               title="用户会话"
               value={formatNumber(data.overview?.basicStats?.uniqueSessions || 0)}
-              change="+5.1% 比昨天"
-              changeType="positive"
+              change={formatChangeText(data.overview?.basicStats?.changes?.uniqueSessions?.value || '无数据', timeRange)}
+              changeType={data.overview?.basicStats?.changes?.uniqueSessions?.type || 'neutral'}
               icon={<Eye />}
               description="用户会话总数"
             />
             <MetricCard
               title="平均会话事件"
               value={(data.overview?.basicStats?.avgEventsPerSession || 0).toFixed(1)}
-              change="-2.3% 比昨天"
-              changeType="negative"
+              change={formatChangeText(data.overview?.basicStats?.changes?.avgEventsPerSession?.value || '无数据', timeRange)}
+              changeType={data.overview?.basicStats?.changes?.avgEventsPerSession?.type || 'neutral'}
               icon={<MousePointer />}
               description="每个会话的平均事件数"
             />
@@ -719,30 +733,30 @@ const AnalyticsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <MetricCard
               title="平均加载时间"
-              value="2.1s"
-              change="-8.3% 比昨天"
-              changeType="positive"
+              value={`${data.performance?.avgLoadTime || 0}s`}
+              change={formatChangeText(data.performance?.changes?.avgLoadTime?.value || '无数据', timeRange)}
+              changeType={data.performance?.changes?.avgLoadTime?.type || 'neutral'}
               icon={<Zap />}
             />
             <MetricCard
               title="首次内容绘制"
-              value="1.2s"
-              change="-5.1% 比昨天"
-              changeType="positive"
+              value={`${data.performance?.avgFCP || 0}s`}
+              change={formatChangeText(data.performance?.changes?.avgFCP?.value || '无数据', timeRange)}
+              changeType={data.performance?.changes?.avgFCP?.type || 'neutral'}
               icon={<Activity />}
             />
             <MetricCard
               title="错误率"
-              value="0.23%"
-              change="-12% 比昨天"
-              changeType="positive"
+              value={`${data.performance?.errorRate || 0}%`}
+              change={formatChangeText(data.performance?.changes?.errorRate?.value || '无数据', timeRange)}
+              changeType={data.performance?.changes?.errorRate?.type || 'neutral'}
               icon={<AlertCircle />}
             />
             <MetricCard
               title="跳出率"
-              value="15.4%"
-              change="+2.1% 比昨天"
-              changeType="negative"
+              value={`${data.performance?.bounceRate || 0}%`}
+              change={formatChangeText(data.performance?.changes?.bounceRate?.value || '无数据', timeRange)}
+              changeType={data.performance?.changes?.bounceRate?.type || 'neutral'}
               icon={<TrendingUp />}
             />
           </div>

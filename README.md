@@ -12,7 +12,7 @@
 
 - **前端**：NextJS + React + TailwindCSS + ShadcnUl + Tiptap + Zustand
 - **后端**：NextJS + Convex + Liveblocks
-- **项目预览**：[Documind 预览地址](https://doc.mebius.fun/) （部署于 Vercel）
+- **项目预览**：[Documind 预览地址](https://google-doc-five.vercel.app/) （部署于 Vercel）
 
 如果使用有异常请挂梯子使用
 
