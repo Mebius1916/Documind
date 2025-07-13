@@ -13,21 +13,6 @@ export const Navbar = () => {
         </Link>
       </div>
       
-      {/* 中间导航菜单 */}
-      <div className="flex items-center gap-4">
-        <Link href="/ai-assistant">
-          <Button variant="ghost" className="text-sm">
-            AI 助手
-          </Button>
-        </Link>
-        <Link href="/admin">
-          <Button variant="ghost" className="text-sm flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            数据分析
-          </Button>
-        </Link>
-      </div>
-      
       <div className="flex items-center gap-3 mr-4" >
         <OrganizationSwitcher
           afterCreateOrganizationUrl="/"

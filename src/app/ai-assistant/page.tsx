@@ -1,15 +1,17 @@
 "use client";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useTransition } from "react";
 import Image from "next/image";
 import { ChatInput } from "./components/chatInput";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
 import ChatMessages from "./components/chatMessage";
 import { useSearchParams } from "@/hooks/use-search-params";
+
 // AI聊天对话框组件
 // initialQuery - 初始查询语句，组件加载时会自动发送
 // initialContent - 初始化内容类型，用于控制界面元素显示
 const ChatDialog = ({ initialContent }: any) => {
   const [initialQuery,setInitialQuery] = useSearchParams("search");
+  
   // 消息列表状态，包含初始欢迎信息
   const [messages, setMessages] = useState([
     {
@@ -45,6 +47,10 @@ def quick_sort(arr):
   // 请求状态标识
   const [isFetching, setIsFetching] = useState(false);
   
+  // 🔥 核心优化：useTransition 用于管理流式更新优先级
+  // 确保用户输入不被频繁的消息更新阻塞
+  const [isPending, startTransition] = useTransition();
+  
   // 自动滚动相关配置
   const {
     messagesEndRef,    // 消息容器底部引用
@@ -60,14 +66,17 @@ def quick_sort(arr):
   useEffect(() => {
     const currentTimeoutRef = timeoutRef.current; // 复制值到变量
     if (messages.length > 1) {
-      scrollToBottom();
+      // 🎯 自动滚动作为非紧急更新处理
+      startTransition(() => {
+        scrollToBottom();
+      });
     }
     return () => {
       if (currentTimeoutRef) {
         clearTimeout(currentTimeoutRef);
       }
     };
-  }, [messages, scrollToBottom, timeoutRef]); // 添加所有依赖
+  }, [messages, scrollToBottom, timeoutRef, startTransition]); // 添加所有依赖
 
   // 发送消息处理函数
   const handleSend = useCallback(async (message?: { role: string; content: string }) => {
@@ -76,13 +85,13 @@ def quick_sort(arr):
     if (!userMessage.content.trim()) return;
     if (isFetching) return;
     
-    // 更新消息列表
+    // 🔥 用户消息添加 - 高优先级，立即执行
     setMessages((prev) => {
       if (prev.some((m) => m.content === userMessage.content)) return prev;
       return [...prev, userMessage];
     });
 
-    // 清空输入框（非预设消息时）
+    // 清空输入框（非预设消息时）- 高优先级
     if (!message) setInput("");
     setIsFetching(true);
     setCanScroll(true);
@@ -122,29 +131,39 @@ def quick_sort(arr):
 
             assistantMessage += processedContent;
 
-            // 更新助手消息内容
-            setMessages((prev) => {
-              const lastMessage = prev[prev.length - 1];
-              if (lastMessage?.role === "assistant") {
+            // 🎯 关键优化：流式更新作为非紧急更新
+            // 确保用户输入不被频繁的消息更新阻塞
+            startTransition(() => {
+              setMessages((prev) => {
+                const lastMessage = prev[prev.length - 1];
+                if (lastMessage?.role === "assistant") {
+                  return [
+                    ...prev.slice(0, -1),
+                    { role: "assistant", content: assistantMessage },
+                  ];
+                }
                 return [
-                  ...prev.slice(0, -1),
+                  ...prev,
                   { role: "assistant", content: assistantMessage },
                 ];
-              }
-              return [
-                ...prev,
-                { role: "assistant", content: assistantMessage },
-              ];
+              });
             });
           }
         }
       }
     } catch (err) {
       console.log(err);
+      // 错误处理也使用transition，不阻塞用户操作
+      startTransition(() => {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "抱歉，发生了错误，请重试。" },
+        ]);
+      });
     } finally {
       setIsFetching(false);
     }
-  }, [input, isFetching, messages, setCanScroll]); 
+  }, [input, isFetching, messages, setCanScroll, startTransition]); 
 
   // 初始查询处理（组件加载时自动发送查询）
   useEffect(() => {
@@ -152,16 +171,19 @@ def quick_sort(arr):
       initialProcessRef.current = true;
       const autoAsk = async () => {
         const userMessage = { role: "user", content: initialQuery };
-        setMessages((prev) => {
-          if (prev.some((m) => m.content === initialQuery)) return prev;
-          return [...prev, userMessage];
+        // 初始消息添加也使用transition
+        startTransition(() => {
+          setMessages((prev) => {
+            if (prev.some((m) => m.content === initialQuery)) return prev;
+            return [...prev, userMessage];
+          });
         });
         await handleSend(userMessage);
         setInitialQuery("");
       };
       autoAsk();
     }
-  }, [initialQuery, handleSend, setInitialQuery]); // 添加所有依赖
+  }, [initialQuery, handleSend, setInitialQuery, startTransition]); // 添加所有依赖
 
   return (
     <div className="flex-1 flex flex-col h-full p-0">
@@ -170,7 +192,11 @@ def quick_sort(arr):
           <Image src="/logo2.png" alt="Logo" width={100} height={100} />
         </div>
       )}
-      <ChatMessages messages={messages} messagesEndRef={messagesEndRef} initialContent={initialContent||""} />
+      <ChatMessages 
+        messages={messages} 
+        messagesEndRef={messagesEndRef} 
+        initialContent={initialContent||""} 
+      />
       <ChatInput
         input={input}
         setInput={setInput}
