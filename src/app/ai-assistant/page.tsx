@@ -5,12 +5,19 @@ import { ChatInput } from "./components/chatInput";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
 import ChatMessages from "./components/chatMessage";
 import { useSearchParams } from "@/hooks/use-search-params";
+import { useTracking } from "@/hooks/use-tracking";
 
 // AI聊天对话框组件
 // initialQuery - 初始查询语句，组件加载时会自动发送
 // initialContent - 初始化内容类型，用于控制界面元素显示
 const ChatDialog = ({ initialContent }: any) => {
-  const [initialQuery,setInitialQuery] = useSearchParams("search");
+  const [initialQuery, setInitialQuery] = useSearchParams("search");
+  
+  // 🎯 添加AI交互追踪
+  const { trackAI } = useTracking();
+  const conversationStartTime = useRef<number>();
+  const messageCount = useRef(0);
+  const conversationId = useRef<string>();
   
   // 消息列表状态，包含初始欢迎信息
   const [messages, setMessages] = useState([
@@ -55,46 +62,63 @@ def quick_sort(arr):
   const {
     messagesEndRef,    // 消息容器底部引用
     scrollToBottom,   // 滚动到底部方法
+    canScroll,        // 是否允许自动滚动
     setCanScroll,     // 设置是否允许自动滚动
     timeoutRef,       // 滚动定时器引用
   } = useAutoScroll();
   
-  // 初始请求处理标识（防止重复处理）
+  // 初始化处理标识
   const initialProcessRef = useRef(false);
 
-  // 消息变化时自动滚动处理
+  // 🎯 AI对话会话开始追踪
   useEffect(() => {
-    const currentTimeoutRef = timeoutRef.current; // 复制值到变量
-    if (messages.length > 1) {
-      // 🎯 自动滚动作为非紧急更新处理
-      startTransition(() => {
-        scrollToBottom();
+    if (!conversationStartTime.current) {
+      conversationStartTime.current = Date.now();
+      conversationId.current = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      trackAI('start', {
+        conversationId: conversationId.current,
+        timestamp: conversationStartTime.current,
+        source: initialContent === "Lassistant" ? 'document_sidebar' : 'main_page',
+        initialQuery: initialQuery || null
       });
     }
+
+    // 🎯 对话结束追踪
     return () => {
-      if (currentTimeoutRef) {
-        clearTimeout(currentTimeoutRef);
+      if (conversationStartTime.current) {
+        const sessionDuration = Date.now() - conversationStartTime.current;
+        trackAI('end', {
+          conversationId: conversationId.current,
+          timestamp: Date.now(),
+          sessionDuration,
+          totalMessages: messageCount.current,
+          source: initialContent === "Lassistant" ? 'document_sidebar' : 'main_page'
+        });
       }
     };
-  }, [messages, scrollToBottom, timeoutRef, startTransition]); // 添加所有依赖
+  }, [trackAI, initialContent, initialQuery]);
 
-  // 发送消息处理函数
-  const handleSend = useCallback(async (message?: { role: string; content: string }) => {
-    // 准备消息内容
-    const userMessage = message || { role: "user", content: input };
-    if (!userMessage.content.trim()) return;
-    if (isFetching) return;
-    
-    // 🔥 用户消息添加 - 高优先级，立即执行
-    setMessages((prev) => {
-      if (prev.some((m) => m.content === userMessage.content)) return prev;
-      return [...prev, userMessage];
+  // 🎯 发送消息并处理AI响应
+  const handleSend = useCallback(async (userMessage?: { role: string; content: string } | null) => {
+    const messageToSend = userMessage || { role: "user", content: input };
+    if (!messageToSend.content.trim() || isFetching) return;
+
+    setIsFetching(true);
+    setInput("");
+    messageCount.current++;
+
+    // 🎯 追踪用户消息发送
+    trackAI('send', {
+      conversationId: conversationId.current,
+      messageLength: messageToSend.content.length,
+      messageNumber: messageCount.current,
+      timestamp: Date.now(),
+      messageType: 'user'
     });
 
-    // 清空输入框（非预设消息时）- 高优先级
-    if (!message) setInput("");
-    setIsFetching(true);
-    setCanScroll(true);
+    // 立即添加用户消息到界面
+    setMessages(prev => [...prev, messageToSend]);
 
     try {
       // 发送聊天请求到API（注意使用最新的 messages 状态）
@@ -104,19 +128,27 @@ def quick_sort(arr):
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: [...messages.slice(-4), userMessage],
+          messages: [...messages.slice(-4), messageToSend],
         }),
       });
+
+      // 🎯 追踪API响应状态
+      if (!response.ok) {
+        throw new Error(`API请求失败: ${response.status}`);
+      }
 
       // 流式数据处理
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let assistantMessage = "";
+      let streamStartTime = Date.now();
+      let chunkCount = 0;
 
       while (true) {
         const { done, value } = await reader!.read();
         if (done) break;
 
+        chunkCount++;
         // 解码并处理数据块
         const chunk = decoder.decode(value);
         const lines = chunk.split("\n\n").filter((line) => line.trim());
@@ -151,8 +183,32 @@ def quick_sort(arr):
           }
         }
       }
+
+      // 🎯 追踪AI响应完成
+      messageCount.current++;
+      const responseTime = Date.now() - streamStartTime;
+      
+      trackAI('receive', {
+        conversationId: conversationId.current,
+        responseLength: assistantMessage.length,
+        responseTime,
+        chunkCount,
+        messageNumber: messageCount.current,
+        timestamp: Date.now(),
+        messageType: 'assistant'
+      });
+
     } catch (err) {
       console.log(err);
+      
+      // 🎯 追踪错误
+      trackAI('error', {
+        conversationId: conversationId.current,
+        error: String(err),
+        messageNumber: messageCount.current,
+        timestamp: Date.now()
+      });
+      
       // 错误处理也使用transition，不阻塞用户操作
       startTransition(() => {
         setMessages((prev) => [
@@ -163,7 +219,7 @@ def quick_sort(arr):
     } finally {
       setIsFetching(false);
     }
-  }, [input, isFetching, messages, setCanScroll, startTransition]); 
+  }, [input, isFetching, messages, startTransition, trackAI]); 
 
   // 初始查询处理（组件加载时自动发送查询）
   useEffect(() => {
@@ -171,6 +227,17 @@ def quick_sort(arr):
       initialProcessRef.current = true;
       const autoAsk = async () => {
         const userMessage = { role: "user", content: initialQuery };
+        
+        // 🎯 追踪自动查询
+        trackAI('send', {
+          conversationId: conversationId.current,
+          messageLength: initialQuery.length,
+          messageNumber: 1,
+          timestamp: Date.now(),
+          messageType: 'auto_query',
+          trigger: 'initial_search'
+        });
+        
         // 初始消息添加也使用transition
         startTransition(() => {
           setMessages((prev) => {
@@ -183,7 +250,7 @@ def quick_sort(arr):
       };
       autoAsk();
     }
-  }, [initialQuery, handleSend, setInitialQuery, startTransition]); // 添加所有依赖
+  }, [initialQuery, handleSend, setInitialQuery, startTransition, trackAI]); // 添加所有依赖
 
   return (
     <div className="flex-1 flex flex-col h-full p-0">

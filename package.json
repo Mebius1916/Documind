@@ -111,6 +111,7 @@
     "@types/react-color": "^3.0.12",
     "@types/react-dom": "^18",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "code-inspector-plugin": "^0.20.15",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
     "postcss": "^8.5.3",

@@ -1,39 +1,35 @@
-import type { Metadata } from "next";;
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import {NuqsAdapter} from "nuqs/adapters/next/app";
 import "./globals.css";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
-import { Toaster } from "sonner";
+import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "@/components/ui/sonner";
+import { EventBusProvider } from "@/components/event-bus-provider";
 
-import "@liveblocks/react-tiptap/styles.css";
-import "@liveblocks/react-ui/styles.css";
-
-const inter =Inter({
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Documind",
-  description: "AI-Powered Collaborative Docs",
+  description: "基于 Next.js 的协同文档平台，集成 AI 对话和实时聊天",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body
-        className={inter.className}
-      >
-        <NuqsAdapter>
+    <ClerkProvider>
+      <html lang="zh-CN">
+        <body className={inter.className}>
           <ConvexClientProvider>
-            <Toaster />
-            {children}
+            <EventBusProvider enableDevLogs={true}>
+              <Toaster />
+              {children}
+            </EventBusProvider>
           </ConvexClientProvider>
-        </NuqsAdapter>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

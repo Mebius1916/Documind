@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const MeasureBuildTimePlugin = require("./webpackTime");
 // 引入 Terser 插件，用于压缩 JavaScript 代码
 const TerserPlugin = require("terser-webpack-plugin");
+// 引入 code-inspector-plugin 插件，用于代码检查
+const { codeInspectorPlugin } = require('code-inspector-plugin');
 // 引入 Next.js 的打包分析插件，只有在环境变量 ANALYZE 为 true 时启用
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
@@ -30,6 +32,9 @@ const nextConfig: NextConfig = {
 
   webpack: (config) => { // 自定义 Webpack 配置
     config.plugins.push(new MeasureBuildTimePlugin()); // 添加自定义构建时间测量插件
+    config.plugins.push(codeInspectorPlugin({
+      bundler: 'webpack',
+    })); // 添加代码检查插件
 
     // 配置代码分割策略
     config.optimization.splitChunks = {
