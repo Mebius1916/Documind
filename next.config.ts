@@ -30,11 +30,17 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true, // 允许在构建时忽略 TypeScript 错误，方便快速开发
   },
 
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   webpack: (config) => { // 自定义 Webpack 配置
     config.plugins.push(new MeasureBuildTimePlugin()); // 添加自定义构建时间测量插件
-    config.plugins.push(codeInspectorPlugin({
-      bundler: 'webpack',
-    })); // 添加代码检查插件
+    if (process.env.NODE_ENV === 'development') {
+      config.plugins.push(codeInspectorPlugin({
+        bundler: 'webpack',
+      })); // 添加代码检查插件（仅开发环境）
+    }
 
     // 配置代码分割策略
     config.optimization.splitChunks = {

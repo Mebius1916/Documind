@@ -5,6 +5,7 @@ import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
 import { EventBusProvider } from "@/components/event-bus-provider";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,12 +23,14 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="zh-CN">
         <body className={inter.className}>
-          <ConvexClientProvider>
-            <EventBusProvider enableDevLogs={true}>
-              <Toaster />
-              {children}
-            </EventBusProvider>
-          </ConvexClientProvider>
+          <NuqsAdapter>
+            <ConvexClientProvider>
+              <EventBusProvider enableDevLogs={true}>
+                <Toaster />
+                {children}
+              </EventBusProvider>
+            </ConvexClientProvider>
+          </NuqsAdapter>
         </body>
       </html>
     </ClerkProvider>

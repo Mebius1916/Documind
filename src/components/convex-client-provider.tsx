@@ -8,7 +8,7 @@ import {
 } from "convex/react";
 import { ReactNode } from "react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { ClerkProvider, useAuth, SignIn } from "@clerk/clerk-react";
+import { useAuth, SignIn } from "@clerk/nextjs";
 import { FullscreenLoader } from "./fullscreen-loader";
 import { useHydration } from "@/hooks/use-hydration";
 
@@ -23,8 +23,7 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}>
-      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
         {/* 已登录状态显示子内容 */}
         <Authenticated>{children}</Authenticated>
         
@@ -41,6 +40,5 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
         </AuthLoading>
 
       </ConvexProviderWithClerk>
-    </ClerkProvider>
   );
 }
